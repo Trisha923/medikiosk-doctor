@@ -1,0 +1,94 @@
+{
+  "entities": {
+    "UserPatient": {
+      "title": "UserPatient",
+      "description": "Patient health record with vitals, OCR prescriptions, and clinical notes",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 120 },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
+        "age": { "type": "number" },
+        "dob": { "type": "string", "maxLength": 20 },
+        "bloodGroup": { "type": "string", "maxLength": 10 },
+        "abha": { "type": "string", "maxLength": 30 },
+        "abhaVerified": { "type": "boolean" },
+        "mrn": { "type": "string", "maxLength": 30 },
+        "mrnVerified": { "type": "boolean" },
+        "vitals": { "type": "object" },
+        "latest_summary": { "type": "string", "maxLength": 2000 },
+        "prescriptions": { "type": "array" },
+        "case_papers": { "type": "array" },
+        "soap_notes": { "type": "object" },
+        "ayush": { "type": "object" }
+      },
+      "required": ["name", "email"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Verified doctor profile with role and clinical authority",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "enum": ["doctor"] },
+        "status": { "type": "string", "enum": ["APPROVED", "SUSPENDED"] },
+        "hospital": { "type": "string", "maxLength": 200 },
+        "department": { "type": "string", "maxLength": 200 },
+        "license": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["name", "email", "role", "status"]
+    },
+    "PendingDoctor": {
+      "title": "PendingDoctor",
+      "description": "Doctor verification application pending clinical board review",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "maxLength": 100 },
+        "hospitalName": { "type": "string", "maxLength": 200 },
+        "hospitalAddress": { "type": "string", "maxLength": 300 },
+        "medicalCouncilRegNo": { "type": "string", "maxLength": 100 },
+        "degreeDetails": { "type": "string", "maxLength": 200 },
+        "degreeDocName": { "type": "string", "maxLength": 200 },
+        "degreeDocPreview": { "type": "string", "maxLength": 2000000 },
+        "email": { "type": "string", "maxLength": 120 },
+        "mobile": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "enum": ["PENDING_REVIEW", "APPROVED", "REJECTED"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["fullName", "email", "medicalCouncilRegNo", "status"]
+    },
+    "AccessOtp": {
+      "title": "AccessOtp",
+      "description": "Patient consent OTP verification token",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 120 },
+        "otp": { "type": "string", "maxLength": 6 },
+        "doctorName": { "type": "string", "maxLength": 100 },
+        "hospital": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "number" },
+        "expiresAt": { "type": "number" }
+      },
+      "required": ["email", "otp", "expiresAt"]
+    }
+  },
+  "firestore": {
+    "/users/{patientUid}": {
+      "schema": "UserPatient",
+      "description": "Patient health records and kiosk clinical dossier"
+    },
+    "/doctors/{doctorUid}": {
+      "schema": "Doctor",
+      "description": "Approved doctors authorized for the clinical portal"
+    },
+    "/pending_doctors/{appId}": {
+      "schema": "PendingDoctor",
+      "description": "Doctor applications awaiting medical compliance verification"
+    },
+    "/access_otps/{patientEmail}": {
+      "schema": "AccessOtp",
+      "description": "Temporary 5-minute patient consent authorization OTPs"
+    }
+  }
+}

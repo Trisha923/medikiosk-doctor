@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all unknown routes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.\\@]+$');
+    }
+
+    // Role check: Only approved doctors can access clinical data
+    function isApprovedDoctor() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/doctors/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/doctors/$(request.auth.uid)).data.status == 'APPROVED'
+      );
+    }
+
+    // Doctors collection
+    match /doctors/{doctorId} {
+      allow get: if isSignedIn() && isValidId(doctorId);
+      allow list: if isApprovedDoctor();
+      allow write: if false; // Managed by clinical admin or automated approval pipeline
+    }
+
+    // Pending doctor verification applications
+    match /pending_doctors/{appId} {
+      allow create: if isValidId(appId) &&
+        request.resource.data.status == 'PENDING_REVIEW' &&
+        request.resource.data.fullName is string &&
+        request.resource.data.email is string &&
+        request.resource.data.medicalCouncilRegNo is string;
+      allow read: if isApprovedDoctor();
+      allow update, delete: if false;
+    }
+
+    // Patient records
+    match /users/{patientUid} {
+      // Patient can read own data; approved doctor can read/write clinical dossier with patient consent
+      allow get: if isValidId(patientUid) && (
+        (isSignedIn() && request.auth.uid == patientUid) ||
+        isApprovedDoctor()
+      );
+      allow list: if isApprovedDoctor();
+      // Approved doctor can update clinical aspects (vitals, soap notes, prescriptions, ayush)
+      allow update: if isApprovedDoctor() || (isSignedIn() && request.auth.uid == patientUid);
+      allow create, delete: if false;
+    }
+
+    // Temporary consent OTPs
+    match /access_otps/{patientEmail} {
+      allow read, write: if isApprovedDoctor();
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "MediKiosk - Doctor & Clinical Admin Portal",
+  "description": "Secure Doctor & Clinical Admin Web Portal for MediKiosk featuring patient consent OTP verification, live vitals calibration, OCR prescription review, and AYUSH Tridosha assessment.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -174,7 +174,10 @@ export default function App() {
               {/* Left Brand */}
               <div className="flex items-center gap-3.5">
                 <img
-                  src="/medikiosk_logo.png"
+                  src="https://i.postimg.cc/zvD4rtzj/icon.jpg"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/medikiosk_logo.png';
+                  }}
                   alt="MediKiosk Logo"
                   className="w-11 h-11 rounded-2xl object-cover shadow-md shadow-red-500/15 shrink-0 border border-slate-100"
                 />

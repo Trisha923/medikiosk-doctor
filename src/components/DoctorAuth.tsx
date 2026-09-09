@@ -188,7 +188,10 @@ export const DoctorAuth: React.FC<DoctorAuthProps> = ({ onLoginSuccess }) => {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <img
-                src="/medikiosk_logo.png"
+                src="https://i.postimg.cc/zvD4rtzj/icon.jpg"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/medikiosk_logo.png';
+                }}
                 alt="MediKiosk Logo"
                 className="w-13 h-13 rounded-2xl object-cover shadow-lg shadow-red-500/25 shrink-0 border border-slate-700/60"
               />

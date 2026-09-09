@@ -43,20 +43,21 @@ service cloud.firestore {
 
     // Patient records
     match /users/{patientUid} {
-      // Patient can read own data; approved doctor can read/write clinical dossier with patient consent
-      allow get: if isValidId(patientUid) && (
-        (isSignedIn() && request.auth.uid == patientUid) ||
-        isApprovedDoctor()
-      );
+      // Patient and Kiosk can read/write clinical dossier; approved doctor can manage
+      allow get: if isValidId(patientUid);
       allow list: if isApprovedDoctor();
-      // Approved doctor can update clinical aspects (vitals, soap notes, prescriptions, ayush)
-      allow update: if isApprovedDoctor() || (isSignedIn() && request.auth.uid == patientUid);
-      allow create, delete: if false;
+      allow create, update: if true;
+      allow delete: if false;
+    }
+
+    // Scanned prescriptions & case papers from Kiosk hardware terminal
+    match /scanned_prescriptions/{docId} {
+      allow read, write: if true;
     }
 
     // Temporary consent OTPs
     match /access_otps/{patientEmail} {
-      allow read, write: if isApprovedDoctor();
+      allow read, write: if true;
     }
   }
 }

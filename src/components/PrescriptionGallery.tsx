@@ -176,13 +176,36 @@ export const PrescriptionGallery: React.FC<PrescriptionGalleryProps> = ({
                 <div className="flex items-start gap-3">
                   <div
                     onClick={() => setSelectedItemForLightbox(doc)}
-                    className="w-16 h-20 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 shrink-0 cursor-pointer relative group"
+                    className="w-16 h-20 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 shrink-0 cursor-pointer relative group flex items-center justify-center"
                   >
-                    <img
-                      src={doc.image_url_or_base64}
-                      alt={doc.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
+                    {(() => {
+                      const rawSrc = doc.image_url_or_base64 || (doc as any).image_url || (doc as any).url || (doc as any).imageUrl;
+                      const isValidSrc = rawSrc && (rawSrc.startsWith('data:image') || rawSrc.startsWith('http') || rawSrc.startsWith('blob:'));
+                      
+                      if (isValidSrc) {
+                        return (
+                          <img
+                            src={rawSrc}
+                            alt={doc.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            onError={(e) => {
+                              // Hide broken image icon and show fallback styling
+                              (e.target as HTMLElement).style.display = 'none';
+                              const parent = (e.target as HTMLElement).parentElement;
+                              if (parent) {
+                                parent.classList.add('bg-amber-50');
+                              }
+                            }}
+                          />
+                        );
+                      }
+                      return (
+                        <div className="flex flex-col items-center justify-center p-1 text-center">
+                          <FileText className="w-6 h-6 text-[#E6533C] mb-0.5" />
+                          <span className="text-[9px] font-bold text-slate-600 line-clamp-1">DOC</span>
+                        </div>
+                      );
+                    })()}
                     <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
                       <ZoomIn className="w-4 h-4" />
                     </div>
@@ -193,24 +216,30 @@ export const PrescriptionGallery: React.FC<PrescriptionGalleryProps> = ({
                       <h4 className="font-bold text-slate-900 text-sm">{doc.name}</h4>
                       <span
                         className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                          doc.doc_type === 'prescription'
+                          (doc.doc_type || (doc as any).docType) === 'prescription'
                             ? 'bg-[#FFE6E2] text-[#E6533C]'
                             : 'bg-blue-50 text-blue-700'
                         }`}
                       >
-                        {doc.doc_type}
+                        {doc.doc_type || (doc as any).docType || 'prescription'}
                       </span>
                     </div>
 
                     <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1 font-mono">
                       <Calendar className="w-3 h-3 text-slate-400" />
-                      {new Date(doc.captured_at).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {(() => {
+                        const raw = doc.captured_at || (doc as any).uploaded_at || (doc as any).createdAt;
+                        if (!raw) return 'Recently Scanned';
+                        const d = new Date(raw);
+                        if (isNaN(d.getTime())) return 'Recently Scanned';
+                        return d.toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        });
+                      })()}
                     </p>
 
                     <button

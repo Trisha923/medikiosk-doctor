@@ -106,10 +106,11 @@ export const VitalsCalibration: React.FC<VitalsCalibrationProps> = ({
         last_checkup: `Calibrated by ${doctor.name} (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`,
       };
 
-      await updatePatientVitals(patient.uid, updatedVitals, doctor);
+      await updatePatientVitals(patient.uid, updatedVitals, doctor, patient);
       onToast('Vitals updated and synced directly with Firebase users collection.', 'success');
-    } catch {
-      onToast('Failed to update vitals in Firebase.', 'error');
+    } catch (err) {
+      console.error('Vitals update notice:', err);
+      onToast('Failed to update vitals: ' + (err instanceof Error ? err.message : 'Please check connection'), 'error');
     } finally {
       setSaving(false);
     }
@@ -321,7 +322,7 @@ export const VitalsCalibration: React.FC<VitalsCalibrationProps> = ({
                 Signing Physician: {doctor.name}
               </p>
               <p className="text-[11px] text-slate-500">
-                Writes to <code className="text-[#E6533C] font-mono">users/{patient.uid}.vitals</code> with clinical timestamp and cryptographic sign-off.
+                Writes to <code className="text-[#E6533C] font-mono">users/{patient.uid || 'patient_id'}.vitals</code> with clinical timestamp and cryptographic sign-off.
               </p>
             </div>
           </div>

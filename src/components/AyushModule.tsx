@@ -100,10 +100,11 @@ export const AyushModule: React.FC<AyushModuleProps> = ({
         aharaVihara: aharaVihara.trim(),
       };
 
-      await updatePatientAyush(patient.uid, evaluation, doctor);
+      await updatePatientAyush(patient.uid, evaluation, doctor, patient);
       onToast('AYUSH Tridosha assessment saved and synchronized in Firestore.', 'success');
-    } catch {
-      onToast('Failed to save AYUSH evaluation.', 'error');
+    } catch (err) {
+      console.error('AYUSH update notice:', err);
+      onToast('Failed to save AYUSH evaluation: ' + (err instanceof Error ? err.message : 'Please check connection'), 'error');
     } finally {
       setSaving(false);
     }

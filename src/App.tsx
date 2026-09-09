@@ -173,9 +173,11 @@ export default function App() {
               
               {/* Left Brand */}
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#E6533C] to-[#FF7A66] text-white flex items-center justify-center shadow-md shadow-red-500/20 shrink-0">
-                  <Stethoscope className="w-6 h-6" />
-                </div>
+                <img
+                  src="/medikiosk_logo.png"
+                  alt="MediKiosk Logo"
+                  className="w-11 h-11 rounded-2xl object-cover shadow-md shadow-red-500/15 shrink-0 border border-slate-100"
+                />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xl font-black tracking-tight text-slate-900">

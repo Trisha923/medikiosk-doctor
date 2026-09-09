@@ -40,19 +40,26 @@ export const PatientDossier: React.FC<PatientDossierProps> = ({
   onLockDossier,
   onToast,
 }) => {
-  const [patient, setPatient] = useState<PatientRecord>(initialPatient);
+  const effectiveUid = initialPatient.uid || (initialPatient as any).id || 'usr_riya_patel_1092';
+  const [patient, setPatient] = useState<PatientRecord>({
+    ...initialPatient,
+    uid: effectiveUid,
+  });
   const [activeTab, setActiveTab] = useState<'prescriptions' | 'vitals' | 'soap' | 'ayush'>('prescriptions');
 
   // Set up real-time live sync with Firebase Firestore
   useEffect(() => {
-    const unsubscribe = subscribeToPatient(initialPatient.uid, (updatedRecord) => {
-      setPatient(updatedRecord);
+    const unsubscribe = subscribeToPatient(effectiveUid, (updatedRecord) => {
+      setPatient({
+        ...updatedRecord,
+        uid: updatedRecord.uid || effectiveUid,
+      });
     });
 
     return () => {
       unsubscribe();
     };
-  }, [initialPatient.uid]);
+  }, [effectiveUid]);
 
   return (
     <div id="patient-dossier-root" className="space-y-6">
@@ -76,7 +83,7 @@ export const PatientDossier: React.FC<PatientDossierProps> = ({
             </div>
             <p className="text-xs text-slate-500 mt-1 flex items-center gap-2 font-medium">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Two-Way Firestore Live Sync: <code className="text-slate-800 font-mono font-bold">users/{patient.uid}</code></span>
+              <span>Two-Way Firestore Live Sync: <code className="text-slate-800 font-mono font-bold">users/{patient.uid || effectiveUid}</code></span>
             </p>
           </div>
         </div>

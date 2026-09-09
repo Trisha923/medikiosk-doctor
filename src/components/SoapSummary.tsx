@@ -86,11 +86,13 @@ export const SoapSummary: React.FC<SoapSummaryProps> = ({
           currentMedications: currentMedications.trim(),
           doctor_notes: doctorNotes.trim(),
         },
-        doctor
+        doctor,
+        patient
       );
       onToast('Clinical SOAP Note updated in users collection and synced.', 'success');
-    } catch {
-      onToast('Failed to save SOAP note.', 'error');
+    } catch (err) {
+      console.error('SOAP note update notice:', err);
+      onToast('Failed to save SOAP note: ' + (err instanceof Error ? err.message : 'Please check connection'), 'error');
     } finally {
       setSaving(false);
     }
@@ -123,7 +125,7 @@ export const SoapSummary: React.FC<SoapSummaryProps> = ({
             </h3>
           </div>
           <p className="text-xs text-slate-500">
-            Kiosk patient-intake synthesis. Editable clinical fields sync to <code className="text-[#E6533C] font-mono">users/{patient.uid}.soap_notes</code> and <code className="text-[#E6533C] font-mono">latest_summary</code>.
+            Kiosk patient-intake synthesis. Editable clinical fields sync to <code className="text-[#E6533C] font-mono">users/{patient.uid || 'patient_id'}.soap_notes</code> and <code className="text-[#E6533C] font-mono">latest_summary</code>.
           </p>
         </div>
 

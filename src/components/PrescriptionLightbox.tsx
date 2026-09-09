@@ -60,12 +60,17 @@ export const PrescriptionLightbox: React.FC<PrescriptionLightboxProps> = ({ item
             <div className="flex items-center gap-2">
               <h3 className="text-sm sm:text-base font-black text-white tracking-wide">{item.name}</h3>
               <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
-                {item.doc_type}
+                {item.doc_type || (item as any).docType || 'prescription'}
               </span>
             </div>
             <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
               <Calendar className="w-3.5 h-3.5 text-slate-500" />
-              Scanned: {new Date(item.captured_at).toLocaleString()} • Kiosk Optical Scanner
+              Scanned: {(() => {
+                const raw = item.captured_at || (item as any).uploaded_at || (item as any).createdAt;
+                if (!raw) return 'Recently Scanned';
+                const d = new Date(raw);
+                return isNaN(d.getTime()) ? 'Recently Scanned' : d.toLocaleString();
+              })()} • Kiosk Optical Scanner
             </p>
           </div>
         </div>
@@ -137,17 +142,51 @@ export const PrescriptionLightbox: React.FC<PrescriptionLightboxProps> = ({ item
       {/* Main Image Canvas */}
       <div className="flex-1 overflow-auto flex items-center justify-center p-4 sm:p-8 cursor-grab active:cursor-grabbing">
         <div
-          className="transition-transform duration-200 ease-out origin-center shadow-2xl rounded-xl overflow-hidden bg-white max-w-4xl"
+          className="transition-transform duration-200 ease-out origin-center shadow-2xl rounded-xl overflow-hidden bg-white max-w-4xl min-w-[320px] min-h-[320px] flex items-center justify-center p-4"
           style={{
             transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
             filter: highContrast ? 'contrast(160%) brightness(95%) grayscale(20%)' : 'none',
           }}
         >
-          <img
-            src={item.image_url_or_base64}
-            alt={item.name}
-            className="max-h-[75vh] w-auto object-contain block mx-auto pointer-events-none"
-          />
+          {(() => {
+            const rawSrc = item.image_url_or_base64 || (item as any).image_url || (item as any).url || (item as any).imageUrl;
+            const isValidSrc = rawSrc && (rawSrc.startsWith('data:image') || rawSrc.startsWith('http') || rawSrc.startsWith('blob:'));
+            
+            if (isValidSrc) {
+              return (
+                <img
+                  src={rawSrc}
+                  alt={item.name}
+                  className="max-h-[75vh] w-auto object-contain block mx-auto pointer-events-none"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                    const parent = (e.target as HTMLElement).parentElement;
+                    if (parent) {
+                      const msg = document.createElement('div');
+                      msg.className = 'p-8 text-center text-slate-500 font-sans';
+                      msg.innerHTML = '<p class="font-bold text-slate-700">Image Preview Unavailable</p><p class="text-xs text-slate-400 mt-1">Image was not uploaded as a valid URL or Base64 string from Kiosk.</p>';
+                      parent.appendChild(msg);
+                    }
+                  }}
+                />
+              );
+            }
+            return (
+              <div className="p-8 text-center text-slate-500 max-w-md">
+                <FileText className="w-16 h-16 mx-auto text-[#E6533C] mb-3" />
+                <p className="font-bold text-slate-800 text-base">{item.name}</p>
+                <p className="text-xs text-slate-500 mt-2">
+                  Document scanned at Kiosk. The local device file path was stored instead of cloud image bytes.
+                </p>
+                {item.ocr_extraction && (
+                  <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-left text-xs font-mono text-slate-700 max-h-48 overflow-y-auto">
+                    <p className="font-bold text-slate-900 mb-1 font-sans">Extracted OCR Clinical Data:</p>
+                    {item.ocr_extraction}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 

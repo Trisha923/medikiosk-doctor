@@ -187,9 +187,11 @@ export const DoctorAuth: React.FC<DoctorAuthProps> = ({ onLoginSuccess }) => {
 
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#E6533C] to-[#FF7A66] text-white flex items-center justify-center shadow-lg shadow-red-500/20">
-                <Stethoscope className="w-7 h-7" />
-              </div>
+              <img
+                src="/medikiosk_logo.png"
+                alt="MediKiosk Logo"
+                className="w-13 h-13 rounded-2xl object-cover shadow-lg shadow-red-500/25 shrink-0 border border-slate-700/60"
+              />
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                 MediKiosk <span className="text-[#FF7A66]">Doctor</span> Portal
               </h1>
